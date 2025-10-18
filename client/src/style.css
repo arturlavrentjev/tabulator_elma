@@ -1,0 +1,5 @@
+@import url("../node_modules/tabulator-tables/dist/css/tabulator.css");
+
+.btns_panel {
+  margin-top: 1em;
+}
