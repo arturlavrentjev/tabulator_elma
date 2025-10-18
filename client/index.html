@@ -10,21 +10,25 @@
 
 <body>
   <div id="app">
+    <form class="form_app">
+      <label for="deal">Сделка:</label>
+      <input id="deal" type="text">
+      <label for="application">Приложение:</label>
+      <input id="application" type="text">
+      <select name="" id="selected_products">
+        <option value="all_products">Все товары</option>
+        <option value="group">Группировать товары</option>
+        <option value="general_products">Общие товары</option>
+      </select>
+      <button>Отправить</button>
+    </form>
     <div class="container"></div>
     <div class="btns_panel">
       <button class="load_movements">Загрузить движения</button>
       <button class="create_product">Создать элемент</button>
       <button class="scheme">Запросить схему</button>
       <button class="products">Загрузить товары</button>
-    </div>
-
-    <div>
-      <select name="" id="selected_products">
-        <option value="all_products">Все товары</option>
-        <option value="group">Группировать товары</option>
-        <option value="general_products">Общие товары</option>
-      </select>
-    </div>
+    </div>    
   </div>
   <script type="module" src="/src/main.ts"></script>
 </body>

@@ -1,4 +1,4 @@
-import type { IMovement, IProduct } from "./types";
+import type { IApplication, IMovement, IMovementPositions, IProduct } from "./types";
 
 export const products: IProduct[] = [
   {
@@ -31,20 +31,32 @@ export const products: IProduct[] = [
   }
 ]
 
+const application: IApplication = {
+  id: "application_1",
+  code: "shipments",
+  namespace: "logistics_and_warehouses"
+}
 
-export const movements: IMovement[] = [
+export const movements_positions: IMovementPositions[] = [
   {
-    app_id: "2",
     key: "1",
     deal_id: "1",
     amount: 2,
     status: "transfer_shipment"
   },
-{
-    app_id: "2",
+  {
     key: "4",
     deal_id: "1",
     amount: 200,
     status: "transfer_shipment"
   }
 ];
+
+export const movements: IMovement[] = [{
+  id: "movement_1",
+  deal: "deal_1",
+  linked_app: application,
+  positions: movements_positions
+}]
+
+

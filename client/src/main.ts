@@ -2,6 +2,7 @@ import { RowComponent, TabulatorFull, type ColumnDefinition, type Options } from
 import "./style.css"
 import { columns } from "./columns";
 import { getMovementsAndProducts } from "./utils";
+import { GroupVariant, type IData } from "./types";
 
 const options: Options = {
   columns,
@@ -129,15 +130,30 @@ function processData(data: any): any[] {
   return new_data;
 }
 
-
-const selected = document.getElementById("selected_products");
-
-selected?.addEventListener("change", async (e: any) => {
-  console.log(await getMovementsAndProducts(e.target.value))
-})
-
 const btn_load = document.querySelector(".products")
 
 btn_load?.addEventListener("click", async () => {
   await getMovementsAndProducts()
 })
+
+const obj: IData = {
+  deal: "",
+  application: "",
+  category: GroupVariant.all_products
+}
+const form_app = document.querySelector(".form_app");
+if (form_app instanceof HTMLFormElement) {
+  form_app?.addEventListener("submit", (e: SubmitEvent) => {
+    e.preventDefault();
+
+    const target = e.target as HTMLFormElement
+    const form_data = new FormData(target);
+    const deal = form_app.querySelector("#deal") as HTMLInputElement;
+    const app = form_app.querySelector("#application") as HTMLInputElement;
+    const option = form_app.querySelector("#selected_products") as HTMLSelectElement;
+    obj.deal = deal.value;
+    obj.application = app.value;
+    obj.category = option.value as GroupVariant;
+    console.log(obj)
+  })
+}

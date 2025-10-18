@@ -1,4 +1,4 @@
-import type { IMovement, IProduct } from "./types";
+import type { IMovementPositions, IProduct } from "./types";
 import { GroupVariant } from "./types";
 import { products, movements } from "./products";
 
@@ -7,10 +7,10 @@ async function getProducts(): Promise<IProduct[]> {
   return await new Promise(res => setTimeout(() => res(products), 1000))
 }
 
-async function getMovements(): Promise<IMovement[]> {
-  return await new Promise(res => setTimeout(() => res(movements), 1000))
+async function getMovements(): Promise<IMovementPositions[]> {
+  return await new Promise(res => setTimeout(() => res(movements.flatMap(movement => 
+    movement.positions.map(position => ({...position})))), 1000))
 }
-
 
 export async function getMovementsAndProducts(variant: GroupVariant = GroupVariant.all_products): Promise<IProduct[]> {
   debugger
@@ -22,6 +22,8 @@ export async function getMovementsAndProducts(variant: GroupVariant = GroupVaria
           product => movements.some(
             movement => Number(movement.key) == product.key && movement.deal_id === product.deal_id));
         return enrichProductsWithAmounts(filter_products_of_movements, movements);
+      case GroupVariant.group:
+        // В общий массив товаров необходимо добавить несколько идентичных позиций, также в нужно собрать массив движений
 
       default:
         return enrichProductsWithAmounts(products, movements);
@@ -34,7 +36,7 @@ export async function getMovementsAndProducts(variant: GroupVariant = GroupVaria
   }
 }
 
-function enrichProductsWithAmounts(products: IProduct[], movements: IMovement[]): IProduct[] {
+function enrichProductsWithAmounts(products: IProduct[], movements: IMovementPositions[]): IProduct[] {
   return products.map(product => {
     const movement = movements.find(movement => Number(movement.key) == product.key && movement.deal_id && product.deal_id);
     if (!movement) return product
