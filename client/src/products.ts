@@ -37,6 +37,12 @@ const application: IApplication = {
   namespace: "logistics_and_warehouses"
 }
 
+const application_2: IApplication =  {
+  id: "application_2",
+  code: "shipments",
+  namespace: "logistics_and_warehouses"
+}
+
 export const movements_positions: IMovementPositions[] = [
   {
     key: "1",
@@ -52,11 +58,24 @@ export const movements_positions: IMovementPositions[] = [
   }
 ];
 
-export const movements: IMovement[] = [{
-  id: "movement_1",
-  deal: "deal_1",
-  linked_app: application,
-  positions: movements_positions
-}]
+export const movements: IMovement[] = [
+  {
+    id: "movement_1",
+    deal: "deal_1",
+    linked_app: application,
+    positions: movements_positions
+  },
+  {
+    id: "movement_2",
+    deal: "deal_2",
+    linked_app: application_2,
+    positions: [{
+      key: "1",
+      deal_id: "deal_2",
+      amount: 2,
+      status: "shipped"
+    }]
+  }
+]
 
 

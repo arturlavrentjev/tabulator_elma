@@ -143,7 +143,7 @@ const obj: IData = {
 }
 const form_app = document.querySelector(".form_app");
 if (form_app instanceof HTMLFormElement) {
-  form_app?.addEventListener("submit", (e: SubmitEvent) => {
+  form_app?.addEventListener("submit", async (e: SubmitEvent) => {
     e.preventDefault();
 
     const target = e.target as HTMLFormElement
@@ -154,6 +154,7 @@ if (form_app instanceof HTMLFormElement) {
     obj.deal = deal.value;
     obj.application = app.value;
     obj.category = option.value as GroupVariant;
-    console.log(obj)
+    const data = await getMovementsAndProducts(obj.application, obj.category)
+    console.log(data)
   })
 }

@@ -7,15 +7,21 @@ async function getProducts(): Promise<IProduct[]> {
   return await new Promise(res => setTimeout(() => res(products), 1000))
 }
 
-async function getMovements(): Promise<IMovementPositions[]> {
-  return await new Promise(res => setTimeout(() => res(movements.flatMap(movement => 
-    movement.positions.map(position => ({...position})))), 1000))
+async function getMovements(app_id?: string): Promise<IMovementPositions[]> {
+  console.log(movements)
+  if (app_id) {
+    const filter_movements = movements.filter(movement => movement.linked_app.id == app_id)
+    return await new Promise(res => setTimeout(() => res(filter_movements.flatMap(movement =>
+      movement.positions.map(position => ({ ...position })))), 1000))
+  }
+  return await new Promise(res => setTimeout(() => res(movements.flatMap(movement =>
+    movement.positions.map(position => ({ ...position })))), 1000))
 }
 
-export async function getMovementsAndProducts(variant: GroupVariant = GroupVariant.all_products): Promise<IProduct[]> {
+export async function getMovementsAndProducts(id?: string, variant: GroupVariant = GroupVariant.all_products): Promise<IProduct[]> {
   debugger
   try {
-    const [products, movements] = await Promise.all([getProducts(), getMovements()]);
+    const [products, movements] = await Promise.all([getProducts(), getMovements(id)]);
     switch (variant) {
       case GroupVariant.general_products:
         const filter_products_of_movements = products.filter(
@@ -23,7 +29,7 @@ export async function getMovementsAndProducts(variant: GroupVariant = GroupVaria
             movement => Number(movement.key) == product.key && movement.deal_id === product.deal_id));
         return enrichProductsWithAmounts(filter_products_of_movements, movements);
       case GroupVariant.group:
-        // В общий массив товаров необходимо добавить несколько идентичных позиций, также в нужно собрать массив движений
+      // В общий массив товаров необходимо добавить несколько идентичных позиций, также в нужно собрать массив движений
 
       default:
         return enrichProductsWithAmounts(products, movements);
