@@ -1,6 +1,7 @@
 import { RowComponent, TabulatorFull, type ColumnDefinition, type Options } from "tabulator-tables";
 import "./style.css"
 import { columns } from "./columns";
+import { getMovementsAndProducts } from "./utils";
 
 const options: Options = {
   columns,
@@ -127,3 +128,16 @@ function processData(data: any): any[] {
 
   return new_data;
 }
+
+
+const selected = document.getElementById("selected_products");
+
+selected?.addEventListener("change", async (e: any) => {
+  console.log(await getMovementsAndProducts(e.target.value))
+})
+
+const btn_load = document.querySelector(".products")
+
+btn_load?.addEventListener("click", async () => {
+  await getMovementsAndProducts()
+})
