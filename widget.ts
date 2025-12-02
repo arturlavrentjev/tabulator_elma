@@ -39,9 +39,9 @@ function inititalData() {
     Context.data.apply_filter_positions = false;
     Context.data.colum_name_for_edit = "К отгрузке"
     Context.data.prefill_selection_positions_from = [
-        new RefItem("logistics_and_warehouse_department", "shipments", "0199b84b-0521-753e-82af-58b741d8921d"),
-        new RefItem("logistics_and_warehouse_department", "packaging", "0199b844-f797-753e-95d1-cd7019cc14cd"),
-        new RefItem("logistics_and_warehouse_department", "packaging", "0199b843-deb3-753e-974a-dbd2f2689cc0"),
+        new RefItem("logistics_and_warehouse_department", "shipments", "019ac9fd-aa6c-7f6f-bd43-6da4e0dacf25"),
+        new RefItem("logistics_and_warehouse_department", "shipment_logistics", "019addc3-0c85-77c2-a010-7704ae3d2d19"),
+        // new RefItem("logistics_and_warehouse_department", "packaging", "0199b843-deb3-753e-974a-dbd2f2689cc0"),
     ]
 }
 interface IBodyDeal {
@@ -213,11 +213,7 @@ async function launch(): Promise<void> {
         case Context.fields.filter_for_positions.variants.storage.code: {
             if (Context.data.key_storage) {
                 const data: any[] = JSON.parse(await System.storage.getItem(Context.data.key_storage) ?? "[]")
-                global_data = data.map(item => ({
-                    ...item,
-                    selected: false,
-                    canceled: item.quantity ?? 0
-                }))
+                global_data = data.filter(item => item.transfer_shipment !== item.shipped)
             }
         }
     }
@@ -282,12 +278,32 @@ type PositionData = BasePositionData & Record<string, unknown>;
 async function iterableMomenents(movements: BaseApplicationItem<Application$logistics_and_warehouse_department$movements$Data, any>[], deals_data: IDealData) {
 
     if (Context.data.group_by?.some(item => item.code == Context.fields.group_by.variants.logistic.code)) {
-        const ship_movement = movements.filter(item =>
-            (item.data.linked_app?.code == "shipments" && Context.data.prefill_selection_positions_from?.some(i => i.id == item.data.linked_app?.id)));
+        const products = searchMovementsForDeals(deals_data);
+        console.log(products)
+        const ship_movement = movements.find(item => !item.data.canceled && (item.data.linked_app?.code == "shipments" && Context.data.prefill_selection_positions_from?.some(i => i.id == item.data.linked_app?.id)));
         // @ts-ignore
-        const pos = ship_movement.flatMap((
-            mov: BaseApplicationItem<Application$logistics_and_warehouse_department$movements$Data, any>) =>
-            mov.data.positions?.map(position => ({ key: position.key, deal_id: position.deal.id })))
+        const ship_positions: any[] = Object.values(ship_movement?.data.positions?.map(row => {
+            const field = ship_movement.data.tabulator_data_row!
+            return {
+                field,
+                [field]: row.amount,
+                key: row.key,
+                deal: row.deal
+            }
+        }).reduce((acc, item) => {
+            const key = generateKey(item);
+            // @ts-ignore
+            if (!acc[key]) {
+                //@ts-ignore
+                acc[key] = item
+            } else {
+                // @ts-ignore
+                acc[key][item.field] = +(acc[key][item.field] + item[item.field]).toFixed(3)
+            }
+            return acc
+        }, {}))
+
+        console.log(ship_positions)
         const logistic_movements = movements.filter(movement =>
             Context.data.prefill_selection_positions_from?.some(item => item.id == movement.data.linked_app?.id) && movement.data.linked_app?.code === "shipment_logistics"
         );
@@ -304,52 +320,51 @@ async function iterableMomenents(movements: BaseApplicationItem<Application$logi
                 })
             })
         });
-        const data = ship_movement.find(movement => !movement.data.canceled)
-        let positions: any[] = searchMovementsForDeals(deals_data, true, "logistic", pos);
-        positions = positions.map(pos => {
-            const transfer_shipment = data?.data.positions!.filter(row => row.key == pos.key && row.deal.id == pos.deal_id)
-
-            return {
-                ...pos,
-                transfer_shipment: transfer_shipment?.reduce((acc, item) => acc + item.amount, 0) ?? undefined
-            }
+        const data: any[] = [];
+        let index: number = 0;
+        result.forEach(item => {
+            const position = products.find(position => position.key == item.key && position.deal_id === item.deal_id);
+            const ship_data = ship_positions.find(ship_pos => ship_pos.key == item.key && ship_pos.deal.id == item.deal_id)
+            data.push({
+                key: item.key,
+                logistic: item.logistic?.includes("Перевозка") ? item.logistic : "Неотгруженные позиции",
+                ...position,
+                transfer_shipment: ship_data.transfer_shipment,
+                // row_id: index + 1,
+                selected: true,
+                way: item["way"],
+                quantity: item["way"]
+            })
         })
-        const a: any[] = [];
-        for (let index = positions.length - 1; index >= 0; index--) {
-            const current_position = positions[index];
-            const filtered_items = result.filter(item =>
-                item.deal_id == current_position.deal_id &&
-                item.key == current_position.key
+
+
+        const filter_positions_data = products.filter(product => {
+            const in_data = data.some(item =>
+                item.key == product.key && item.deal_id === product.deal_id
             );
 
-            if (filtered_items.length > 0) {
-                // for (const item of filtered_items) {
-                a.push({
-                    ...current_position,
-                    id: filtered_items[0].id,
-                    selected: true,
-                    quantity: filtered_items[0].way,
-                    way: filtered_items[0].way,
-                    logistic: filtered_items[0].logistic
-                });
-                // }
-                positions.splice(index, 1);
-            }
-        }
-        positions.unshift(...a)
-        let index = 0;
-        positions = positions.sort((a, b) => {
-            let numA = a.logistic === "Все позиции" ? Infinity : Number(a.logistic?.split(' ')[1]);
-            let numB = b.logistic === "Все позиции" ? Infinity : Number(b.logistic?.split(' ')[1]);
-            return numA - numB;
-        })
-        positions = positions.map(position => {
+            const in_ship_positions = ship_positions.some(item =>
+                item.key == product.key && item.deal?.id === product.deal_id
+            );
+
+            return (!in_data && in_ship_positions);
+        }).map(item => {
+            const ship = ship_positions.find(pos => pos.key == item.key && pos.deal.id === item.deal_id)
             return {
-                ...position,
-                row_id: index += 1
+                ...item,
+                logistic: "Неотгруженные позиции",
+                way: undefined,
+                transfer_shipment: ship?.transfer_shipment
             }
         })
-        global_data = positions;
+
+        data.push(...filter_positions_data)
+        console.log(data)
+        global_data = data.sort((a, b) => {
+            let num_a = a.logistic === "Неотгруженные позиции" ? Infinity : Number(a.logistic?.split(' ')[1]);
+            let num_b = b.logistic === "Неотгруженные позиции" ? Infinity : Number(b.logistic?.split(' ')[1]);
+            return num_a - num_b;
+        }).map(item => ({ ...item, row_id: index + 1 }));
         return
     }
 
@@ -802,7 +817,7 @@ function applyFilter(row: Table$Context$conditions_for_excluding_positions$Row) 
     table.setFilter(function (data: any) {
         const column_value = data[tabulator_data_code];
 
-        if (data["packaging"]?.includes("Место") || data["selected"]) return column_value;
+        if ((data["packaging"]?.includes("Место") && data["selected"])) return column_value;
 
         switch (operation.code) {
             case "addition":
@@ -893,7 +908,7 @@ async function onLoad(): Promise<void> {
                 const rows = returnRows(group);
                 const is_selected = rows.some((row: any) => row.getData().selected == true)
                 let html = `<div>${value ?? ""} <span style="color: red;">(${count} item)</span></div>`
-                if (value !== "Все позиции" && (group.getField() == "packaging" || group.getField() == "logistic")) {
+                if ((value !== "Все позиции" || value !== "Неотгруженные позиции") && (group.getField() == "packaging" || group.getField() == "logistic")) {
                     if (!Context.data.readonly) {
                         return html = `<div style="display: flex; gap: 10px;"><input type="checkbox" ${is_selected ? "checked='checked'" : ""}><div style="display: flex;">${value ?? ""} <span style="color: red;">(${count} item)</span></div></div>`
                     }
