@@ -7,3 +7,87 @@
 .form_app {
   margin-bottom: 1.3rem;
 }
+
+.tabulator-print-table {
+  width: 100%;
+  border-width: 1px;
+  /* border-style: solid;  */
+  /* border-color: rgb(153, 153, 153); */
+}
+
+.head_row {
+  box-sizing: border-box;
+  text-align: center;
+  border-width: 0px 1px 1px 0px;
+  /* border-style: none solid solid none; */
+  /* border-color: rgb(85, 85, 85) rgb(170, 170, 170) rgb(153, 153, 153) rgb(85, 85, 85); */
+  /* background-color: rgb(230, 230, 230); */
+  font-weight: 700;
+  font-family: Times;
+  font-size: 14px;
+  padding: 4px;
+  width: 81px;
+}
+
+
+#search-input {
+  margin-top: 15px;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  outline: none;
+  transition: all 0.3s ease-in-out;
+}
+
+#suggestions {
+  margin-top: 10px;
+  list-style: none;
+  padding: 0;
+  width: 100%;
+  max-width: 300px;
+  background-color: white;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+#suggestions li {
+  padding: 10px;
+  cursor: pointer;
+  color: black;
+}
+
+#suggestions li:hover {
+  background-color: #f0f0f0;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.custom_input {
+  position: relative;
+  width: 100%;
+}
+
+.custom_list {
+  position: absolute;
+  list-style-type: none;
+  z-index: 1000;
+  border: 1px solid #aaa;
+  background-color: #fff;
+  padding: 5px;
+  min-height: 200px;
+  overflow-y: auto;
+  display: block;
+}
+
+.option {
+  transition: background-color 0.1s ease-in-out;
+}
+
+.option:hover {
+  background-color: gray;
+}

@@ -24,11 +24,21 @@
     </form>
     <div class="container"></div>
     <div class="btns_panel">
-      <button class="load_movements">Загрузить движения</button>
+      <button class="load_movements" style="font-size: 12px; padding: 10px;">Загрузить движения</button>
       <button class="create_product">Создать элемент</button>
+      <button class="save">Сохранить</button>
       <button class="scheme">Запросить схему</button>
       <button class="products">Загрузить товары</button>
-    </div>    
+      <button class="delete">УДАЛИТЬ</button>
+
+    </div>
+    <div id="app">
+      <label for="search-input">Поиск:</label>
+      <input type="text" id="search-input" placeholder="Введите товар"  />
+      <ul id="suggestions"></ul>
+    </div>
+      
+    <div id="table_2"></div>
   </div>
   <script type="module" src="/src/main.ts"></script>
 </body>

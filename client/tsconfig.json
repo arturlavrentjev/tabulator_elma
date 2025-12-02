@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "ES6",
     "useDefineForClassFields": true,
-    "module": "ESNext",
+    "module": "es2020",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["vite/client"],
     "skipLibCheck": true,
@@ -10,17 +10,18 @@
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
+    // "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "erasableSyntaxOnly": false,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["client/src"]
+  "include": ["src/*.ts"],
+  "exclude": ["./client/dist/"]
 }

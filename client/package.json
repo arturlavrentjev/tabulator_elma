@@ -9,11 +9,13 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/axios": "^0.9.36",
     "@types/tabulator-tables": "^6.2.11",
     "typescript": "~5.9.3",
     "vite": "^7.1.7"
   },
   "dependencies": {
+    "axios": "^1.13.2",
     "tabulator-tables": "^6.3.1"
   }
 }
